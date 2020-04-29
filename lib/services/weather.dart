@@ -1,4 +1,5 @@
 import 'package:clima/services/location.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:clima/services/networking.dart';
 
 const apiKey = '23f84b81afdc585103bd17f8c969f9a6';
@@ -15,12 +16,18 @@ class WeatherModel {
 
   //get weather by current location
   Future<dynamic> getLocationWeather() async {
-    Location location = Location();
-    await location.getCurrentLocation();
-    NetworkHelper helper = NetworkHelper(
-        '$openWeatherMapUrl?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
-    var weatherData = await helper.getData();
-    return weatherData;
+    //to check if location switch is turned off
+    bool isLocationEnabled = await Geolocator().isLocationServiceEnabled();
+    if (isLocationEnabled) {
+      Location location = Location();
+      await location.getCurrentLocation();
+      NetworkHelper helper = NetworkHelper(
+          '$openWeatherMapUrl?lat=${location.latitude}&lon=${location.longitude}&appid=$apiKey&units=metric');
+      var weatherData = await helper.getData();
+      return weatherData;
+    } else {
+      return null;
+    }
   }
 
   String getWeatherIcon(int condition) {
